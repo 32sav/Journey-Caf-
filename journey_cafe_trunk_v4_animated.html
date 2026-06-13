@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Journey Cafe - Trunk Tracker</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/tabler-icons.min.css">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+    .app{padding:1rem 0;font-family:var(--font-sans);}
+    .nav{display:flex;gap:2px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap;}
+    .nav button{background:none;border:none;border-radius:0;padding:8px 11px;font-size:13px;color:var(--color-text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-0.5px;}
+    .nav button.active{color:var(--color-text-primary);border-bottom:2px solid var(--color-text-primary);font-weight:500;}
+    .nav button:hover:not(.active){color:var(--color-text-primary);}
+    .page{display:none;}.page.active{display:block;}
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.5rem;}
+    .stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;}
+    .stat-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:5px;}
+    .stat-value{font-size:22px;font-weight:500;color:var(--color-text-primary);}
+    .stat-value.warn{color:var(--color-text-warning);}
+    .stat-value.ok{color:var(--color-text-success);}
+    .stat-value.info{color:var(--color-text-info);}
+    .sec-title{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;}
+    .card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:1rem;}
+    .item-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+    .item-row:last-child{border-bottom:none;}
+    .cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .item-main{flex:1;min-width:0;}
+    .item-name{font-size:14px;font-weight:500;color:var(--color-text-primary);}
+    .item-meta{font-size:11px;color:var(--color-text-secondary);margin-top:1px;}
+    .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500;}
+    .badge-warn{background:var(--color-background-warning);color:var(--color-text-warning);}
+    .badge-ok{background:var(--color-background-success);color:var(--color-text-success);}
+    .badge-info{background:var(--color-background-info);color:var(--color-text-info);}
+    .badge-muted{background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-secondary);}
+    .badge-purple{background:#EEEDFE;color:#3C3489;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+    .form-row.single{grid-template-columns:1fr;}
+    label{font-size:13px;color:var(--color-text-secondary);display:block;margin-bottom:4px;}
+    input,select,textarea{width:100%;}
+    textarea{height:65px;resize:vertical;}
+    .btn-primary{background:var(--color-text-primary);color:var(--color-background-primary);border:none;border-radius:var(--border-radius-md);padding:8px 16px;font-size:13px;cursor:pointer;font-weight:500;}
+    .btn-primary:hover{opacity:.85;}
+    .btn-sm{font-size:12px;padding:4px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:none;cursor:pointer;color:var(--color-text-primary);}
+    .btn-sm:hover{background:var(--color-background-secondary);}
+    .btn-sm.ok{color:var(--color-text-success);border-color:var(--color-border-success);}
+    .btn-sm.danger{color:var(--color-text-danger);border-color:var(--color-border-danger);}
+    .btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+    .avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;}
+    .alert{border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:1rem;font-size:13px;display:flex;align-items:flex-start;gap:8px;}
+    .alert-warn{background:var(--color-background-warning);color:var(--color-text-warning);}
+    .alert-info{background:var(--color-background-info);color:var(--color-text-info);}
+    .alert-ok{background:var(--color-background-success);color:var(--color-text-success);}
+    .member-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+    .member-info{flex:1;min-width:0;}
+    .member-name{font-size:14px;font-weight:500;color:var(--color-text-primary);}
+    .member-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px;}
+    .perm-chip{font-size:11px;padding:3px 8px;border-radius:99px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);background:none;margin-right:4px;}
+    .perm-chip.on{background:var(--color-background-info);color:var(--color-text-info);border-color:transparent;}
+    .log-entry{display:flex;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--color-border-tertiary);align-items:flex-start;}
+    .log-entry:last-child{border-bottom:none;}
+    .log-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+    .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;}
+    .locked-msg{text-align:center;padding:2.5rem 1rem;color:var(--color-text-secondary);}
+    .locked-msg i{font-size:28px;display:block;margin-bottom:10px;}
+    .login-wrap{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:1.75rem;max-width:320px;margin:0 auto;}
+    .member-login-list{margin-bottom:1.25rem;}
+    .member-login-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:6px;cursor:pointer;background:var(--color-background-primary);}
+    .member-login-item:hover{background:var(--color-background-secondary);}
+    .member-login-item.selected{border:2px solid var(--color-border-info);background:var(--color-background-info);}
+
+    /* ============= 3D/4D ANIMATION STYLES ============= */
+    .gallery-container {
+      perspective: 1200px;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: var(--color-background-secondary);
+      border-radius: var(--border-radius-lg);
+    }
+
+    .gallery-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--color-text-primary);
+      text-align: center;
+    }
+
+    .card-3d-container {
+      width: 100%;
+      height: 350px;
+      position: relative;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-3d {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotateCard 8s infinite linear;
+      cursor: pointer;
+    }
+
+    .card-3d:hover {
+      animation-play-state: paused;
+    }
+
+    .card-3d-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .card-3d-face img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-3d-face.back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    @keyframes rotateCard {
+      0% { transform: rotateY(0deg) rotateX(0deg); }
+      25% { transform: rotateY(180deg) rotateX(10deg); }
+      50% { transform: rotateY(360deg) rotateX(-10deg); }
+      75% { transform: rotateY(180deg) rotateX(5deg); }
+      100% { transform: rotateY(0deg) rotateX(0deg); }
+    }
+
+    /* Carousel Gallery */
+    .carousel-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: var(--color-background-secondary);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .carousel-slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform: scale(0.8) translateX(50px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+    }
+
+    .carousel-slide.active {
+      opacity: 1;
+      transform: scale(1) translateX(0);
+      z-index: 10;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .carousel-controls {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: background 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .carousel-dot.active {
+      background: white;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Flip Gallery */
+    .flip-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .flip-card {
+      height: 200px;
+      cursor: pointer;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+
+    .flip-card:hover {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+    }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .flip-card-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .flip-card-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Parallax Gallery */
+    .parallax-gallery {
+      margin: 1.5rem 0;
+      perspective: 1000px;
+    }
+
+    .parallax-item {
+      height: 250px;
+      margin-bottom: 1rem;
+      position: relative;
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .parallax-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    /* Liquid Gallery */
+    .liquid-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .liquid-img {
+      flex: 1;
+      min-width: 150px;
+      height: 200px;
+      border-radius: 50% 60% 70% 40% / 40% 50% 60% 50%;
+      overflow: hidden;
+      animation: shapeMorph 8s ease-in-out infinite;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .liquid-img:nth-child(2) {
+      animation-delay: 2s;
+    }
+
+    .liquid-img:nth-child(3) {
+      animation-delay: 4s;
+    }
+
+    .liquid-img:nth-child(4) {
+      animation-delay: 6s;
+    }
+
+    .liquid-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @keyframes shapeMorph {
+      0%, 100% { border-radius: 50% 60% 70% 40% / 40% 50% 60% 50%; }
+      50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+    }
+
+    /* Light box effect */
+    .img-lightbox {
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .img-lightbox:hover {
+      transform: scale(1.05) brightness(1.1);
+    }
+
+    .img-lightbox img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Stagger animation */
+    .gallery-stagger {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .stagger-item {
+      opacity: 0;
+      animation: staggerIn 0.6s ease forwards;
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      height: 180px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .stagger-item:nth-child(1) { animation-delay: 0s; }
+    .stagger-item:nth-child(2) { animation-delay: 0.1s; }
+    .stagger-item:nth-child(3) { animation-delay: 0.2s; }
+    .stagger-item:nth-child(4) { animation-delay: 0.3s; }
+
+    @keyframes staggerIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .stagger-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .stagger-item:hover img {
+      transform: scale(1.1) rotate(2deg);
+    }
+  </style>
+</head>
+<body style="background:var(--color-background-primary);--color-text-primary:#1f2937;--color-text-secondary:#6b7280;--color-text-warning:#d97706;--color-text-success:#059669;--color-text-danger:#dc2626;--color-text-info:#0891b2;--color-background-primary:#ffffff;--color-background-secondary:#f9fafb;--color-background-warning:#fef3c7;--color-background-success:#ecfdf5;--color-background-info:#ecf0ff;--color-border-tertiary:#e5e7eb;--color-border-secondary:#f3f4f6;--border-radius-md:8px;--border-radius-lg:12px;--font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+
+<div class="app">
+<h2 class="sr-only">Journey Cafe trunk tracker — CAFE26 admin login, members access granted by admin</h2>
+
+<div id="login-screen">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;">
+    <i class="ti ti-package" style="font-size:22px;" aria-hidden="true"></i>
+    <div>
+      <div style="font-size:16px;font-weight:500;color:var(--color-text-primary);">Journey Cafe</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);">Storage trunk tracker</div>
+    </div>
+  </div>
+  <div class="login-wrap">
+    <div style="font-size:15px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary);">Sign in</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem;">Select your account</div>
+
+    <div class="member-login-list" id="login-list"></div>
+
+    <div id="pin-section" style="display:none;">
+      <label>PIN</label>
+      <input type="password" id="login-pin" placeholder="Enter your PIN" style="margin-bottom:8px;" maxlength="4">
+      <button class="btn-primary" style="width:100%;margin-bottom:8px;" onclick="doLogin()">Sign in</button>
+      <button class="btn-sm" style="width:100%;text-align:center;" onclick="clearSelection()">Back</button>
+    </div>
+    <div id="login-err" style="font-size:13px;color:var(--color-text-danger);margin-top:8px;"></div>
+  </div>
+</div>
+
+<div id="main-app" style="display:none; max-width:1000px; margin:0 auto; padding:0 1rem;">
+  <div class="top-bar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <i class="ti ti-package" style="font-size:20px;" aria-hidden="true"></i>
+      <div>
+        <div style="font-size:15px;font-weight:500;color:var(--color-text-primary);">Journey Cafe</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);" id="top-date"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="avatar" id="top-av"></div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);" id="top-name"></div>
+        <span class="badge" id="top-role-badge"></span>
+      </div>
+      <button class="btn-sm" onclick="logout()" title="Sign out"><i class="ti ti-logout" aria-hidden="true"></i></button>
+    </div>
+  </div>
+  <nav class="nav" id="main-nav"></nav>
+  <div id="page-dashboard" class="page active"></div>
+  <div id="page-inventory" class="page"></div>
+  <div id="page-restock" class="page"></div>
+  <div id="page-confirm" class="page"></div>
+  <div id="page-members" class="page"></div>
+  <div id="page-log" class="page"></div>
+</div>
+
+<script>
+// Image URLs - Replace these with your actual GitHub image URLs
+const IMAGE_URLS = {
+  img1: 'https://via.placeholder.com/500x350?text=Journey+Cafe+Team+1',
+  img2: 'https://via.placeholder.com/500x350?text=Journey+Cafe+Team+2',
+  img3: 'https://via.placeholder.com/500x350?text=Journey+Cafe+Team+3',
+  img4: 'https://via.placeholder.com/500x350?text=Journey+Cafe+Team+4'
+};
+
+const CAT_COLORS={Packaging:'#178DDC','Food Prep':'#1D9E75',Breakfast:'#EF9F27',Maintenance:'#D85A30'};
+
+let members=[
+  {id:'andy',name:'CAFE26',role:'Admin',pin:'1234',initials:'C6',bg:'#EEEDFE',fg:'#3C3489',perms:{view:true,update:true},active:true,grantedBy:'system',showOnLogin:true},
+  {id:'mark',name:'Mark',role:'Member',pin:'5678',initials:'MK',bg:'#E1F5EE',fg:'#085041',perms:{view:false,update:false},active:false,grantedBy:'',showOnLogin:false},
+  {id:'grace',name:'Grace',role:'Member',pin:'5678',initials:'GR',bg:'#E1F5EE',fg:'#085041',perms:{view:false,update:false},active:false,grantedBy:'',showOnLogin:false},
+  {id:'kevin',name:'Kevin',role:'Member',pin:'0000',initials:'KV',bg:'#F1EFE8',fg:'#444441',perms:{view:false,update:false},active:false,grantedBy:'',showOnLogin:false},
+];
+
+let items=[
+  {id:1,name:'Small Bags',category:'Packaging',qty:200,unit:'pcs',min:100,section:'B – Serving'},
+  {id:2,name:'Medium Bags',category:'Packaging',qty:80,unit:'pcs',min:50,section:'B – Serving'},
+  {id:3,name:'Size 5 Bags',category:'Packaging',qty:18,unit:'pcs',min:30,section:'B – Serving'},
+  {id:4,name:'Clean Film',category:'Food Prep',qty:2,unit:'rolls',min:2,section:'A – Preparation'},
+  {id:5,name:'Aluminium Foil',category:'Food Prep',qty:3,unit:'rolls',min:2,section:'A – Preparation'},
+  {id:6,name:'Sugar',category:'Breakfast',qty:2,unit:'kg',min:5,section:'C – Breakfast'},
+  {id:7,name:'Soap',category:'Maintenance',qty:1,unit:'pcs',min:1,section:'D – Maintenance'},
+  {id:8,name:'Trash Bags',category:'Maintenance',qty:10,unit:'pcs',min:5,section:'D – Maintenance'},
+];
+
+let pendingRestocks=[];
+let activityLog=[];
+let nextRid=1;
+let currentUser=null;
+let selectedLoginId=null;
+let carouselIndices = {dashboard: 0, inventory: 0, restock: 0, members: 0};
+
+function isLow(i){return i.qty<i.min;}
+function todayStr(){return new Date().toLocaleDateString('en-KE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function timeStr(){return new Date().toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});}
+function addLog(type,title,detail,who){activityLog.unshift({type,title,detail,who,time:timeStr()});}
+function getMember(id){return members.find(m=>m.id===id);}
+
+function buildLoginList(){
+  const visible=members.filter(m=>m.showOnLogin||m.active);
+  const list=document.getElementById('login-list');
+  list.innerHTML='';
+  visible.forEach(m=>{
+    const div=document.createElement('div');
+    div.className='member-login-item';
+    div.id='login-item-'+m.id;
+    div.innerHTML=`<div class="avatar" style="background:${m.bg};color:${m.fg};width:32px;height:32px;font-size:11px;">${m.initials}</div>
+      <div>
+        <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${m.name}</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">${m.role==='Admin'?'Admin':'Member'}</div>
+      </div>`;
+    div.onclick=()=>selectLoginMember(m.id);
+    list.appendChild(div);
+  });
+}
+
+function selectLoginMember(id){
+  selectedLoginId=id;
+  document.querySelectorAll('.member-login-item').forEach(el=>el.classList.remove('selected'));
+  const el=document.getElementById('login-item-'+id);
+  if(el) el.classList.add('selected');
+  document.getElementById('pin-section').style.display='block';
+  document.getElementById('login-pin').value='';
+  document.getElementById('login-pin').focus();
+  document.getElementById('login-err').textContent='';
+}
+
+function clearSelection(){
+  selectedLoginId=null;
+  document.querySelectorAll('.member-login-item').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('pin-section').style.display='none';
+  document.getElementById('login-err').textContent='';
+}
+
+function doLogin(){
+  const pin=document.getElementById('login-pin').value;
+  const err=document.getElementById('login-err');
+  if(!selectedLoginId){err.textContent='Please select your account.';return;}
+  const m=getMember(selectedLoginId);
+  if(pin!==m.pin){err.textContent='Incorrect PIN. Please try again.';return;}
+  if(m.role!=='Admin'&&!m.active){err.textContent='Your account is not yet active. Ask CAFE26 to grant you access.';return;}
+  currentUser=m;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('top-date').textContent=todayStr();
+  document.getElementById('top-name').textContent=m.name;
+  const av=document.getElementById('top-av');
+  av.textContent=m.initials;av.style.background=m.bg;av.style.color=m.fg;
+  const rb=document.getElementById('top-role-badge');
+  rb.textContent=m.role==='Admin'?'Admin':'Member';
+  rb.className='badge '+(m.role==='Admin'?'badge-purple':'badge-muted');
+  buildNav();
+  addLog('auth',`${m.name} signed in`,'',m.name);
+  showPage('dashboard',null);
+}
+
+function logout(){
+  if(currentUser) addLog('auth',`${currentUser.name} signed out`,'',currentUser.name);
+  currentUser=null;selectedLoginId=null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('pin-section').style.display='none';
+  document.getElementById('login-pin').value='';
+  document.getElementById('login-err').textContent='';
+  buildLoginList();
+}
+
+function buildNav(){
+  const u=currentUser;
+  const isAdmin=u.role==='Admin';
+  const canView=isAdmin||u.perms.view;
+  const canUpdate=isAdmin||u.perms.update;
+  const tabs=[
+    {id:'dashboard',label:'Dashboard',show:true},
+    {id:'inventory',label:'Inventory',show:canView},
+    {id:'restock',label:'Saturday restock',show:canUpdate},
+    {id:'confirm',label:'Confirm restocks',show:isAdmin},
+    {id:'members',label:'Members & access',show:isAdmin},
+    {id:'log',label:'Log',show:isAdmin},
+  ];
+  const nav=document.getElementById('main-nav');
+  nav.innerHTML='';
+  tabs.filter(t=>t.show).forEach((t,i)=>{
+    const btn=document.createElement('button');
+    btn.textContent=t.label;
+    if(i===0) btn.classList.add('active');
+    btn.onclick=()=>showPage(t.id,btn);
+    nav.appendChild(btn);
+  });
+}
+
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);
+  if(pg) pg.classList.add('active');
+  if(btn) btn.classList.add('active');
+  else{const first=document.querySelector('.nav button');if(first)first.classList.add('active');}
+  const renders={dashboard:renderDashboard,inventory:renderInventory,restock:renderRestock,confirm:renderConfirm,members:renderMembers,log:renderLog};
+  if(renders[name]) renders[name]();
+}
+
+// ============ GALLERY RENDERERS ============
+function renderGallery3DCard(pageId) {
+  return `
+    <div class="gallery-container">
+      <div class="gallery-title">📸 Team Moments</div>
+      <div class="card-3d-container">
+        <div class="card-3d">
+          <div class="card-3d-face">
+            <img src="${IMAGE_URLS.img1}" alt="Journey Cafe Team">
+          </div>
+          <div class="card-3d-face back">Team Photo 1</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCarousel(pageId) {
+  let html = `
+    <div class="gallery-container">
+      <div class="gallery-title">🎬 Photo Carousel</div>
+      <div class="carousel-container">
+  `;
+  
+  Object.values(IMAGE_URLS).forEach((url, i) => {
+    html += `<div class="carousel-slide ${i === 0 ? 'active' : ''}"><img src="${url}" alt="Team photo"></div>`;
+  });
+  
+  html += `</div><div class="carousel-controls">`;
+  Object.keys(IMAGE_URLS).forEach((_, i) => {
+    html += `<div class="carousel-dot ${i === 0 ? 'active' : ''}" onclick="nextCarouselSlide('${pageId}', ${i})"></div>`;
+  });
+  html += `</div></div>`;
+  
+  return html;
+}
+
+function renderFlipGallery() {
+  let html = `
+    <div class="gallery-container">
+      <div class="gallery-title">🔄 Flip Gallery - Hover to flip!</div>
+      <div class="flip-gallery">
+  `;
+  
+  Object.values(IMAGE_URLS).forEach((url) => {
+    html += `
+      <div class="flip-card">
+        <div class="flip-card-inner">
+          <div class="flip-card-front"><img src="${url}" alt="Team photo"></div>
+          <div class="flip-card-back">Beautiful moments at Journey Cafe ☕</div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += `</div></div>`;
+  return html;
+}
+
+function renderParallaxGallery() {
+  let html = `
+    <div class="gallery-container">
+      <div class="gallery-title">✨ Parallax Gallery</div>
+      <div class="parallax-gallery">
+  `;
+  
+  Object.values(IMAGE_URLS).forEach((url) => {
+    html += `<div class="parallax-item"><img src="${url}" alt="Team photo"></div>`;
+  });
+  
+  html += `</div></div>`;
+  return html;
+}
+
+function renderLiquidGallery() {
+  let html = `
+    <div class="gallery-container">
+      <div class="gallery-title">💧 Liquid Gallery</div>
+      <div class="liquid-gallery">
+  `;
+  
+  Object.values(IMAGE_URLS).forEach((url) => {
+    html += `<div class="liquid-img"><img src="${url}" alt="Team photo"></div>`;
+  });
+  
+  html += `</div></div>`;
+  return html;
+}
+
+function renderStaggerGallery() {
+  let html = `
+    <div class="gallery-container">
+      <div class="gallery-title">🎪 Stagger Gallery</div>
+      <div class="gallery-stagger">
+  `;
+  
+  Object.values(IMAGE_URLS).forEach((url) => {
+    html += `<div class="stagger-item"><img src="${url}" alt="Team photo"></div>`;
+  });
+  
+  html += `</div></div>`;
+  return html;
+}
+
+function nextCarouselSlide(pageId, index) {
+  carouselIndices[pageId] = index;
+  document.querySelectorAll('.carousel-slide').forEach((el, i) => {
+    el.classList.toggle('active', i === index);
+  });
+  document.querySelectorAll('.carousel-dot').forEach((el, i) => {
+    el.classList.toggle('active', i === index);
+  });
+}
+
+function renderDashboard(){
+  const u=currentUser;
+  const isAdmin=u.role==='Admin';
+  const canView=isAdmin||u.perms.view;
+  const low=items.filter(isLow);
+  const pending=pendingRestocks.filter(r=>r.status==='pending');
+  let html='';
+  if(!canView){
+    html=`<div class="locked-msg"><i class="ti ti-lock" aria-hidden="true"></i><div style="font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;">Limited access</div><div style="font-size:13px;">CAFE26 has not granted you any permissions yet.</div></div>`;
+    document.getElementById('page-dashboard').innerHTML=html;return;
+  }
+  html+=`<div class="stat-grid">
+    <div class="stat"><div class="stat-label">Total items</div><div class="stat-value">${items.length}</div></div>
+    <div class="stat"><div class="stat-label">Low stock</div><div class="stat-value warn">${low.length}</div></div>
+    <div class="stat"><div class="stat-label">Stocked OK</div><div class="stat-value ok">${items.length-low.length}</div></div>
+    ${isAdmin?`<div class="stat"><div class="stat-label">Awaiting confirm</div><div class="stat-value info">${pending.length}</div></div>`:''}
+  </div>`;
+  
+  html += renderGallery3DCard('dashboard');
+  
+  if(isAdmin&&pending.length) html+=`<div class="alert alert-info"><i class="ti ti-bell" aria-hidden="true"></i><span>${pending.length} restock submission(s) waiting for your confirmation.</span></div>`;
+  if(low.length){
+    html+=`<div class="sec-title">Needs restocking</div><div class="card">`;
+    html+=low.map(i=>`<div class="item-row">
+      <div class="cat-dot" style="background:${CAT_COLORS[i.category]}"></div>
+      <div class="item-main"><div class="item-name">${i.name}</div><div class="item-meta">${i.category}</div></div>
+      <div style="text-align:right;"><div style="font-size:14px;font-weight:500;color:var(--color-text-warning);">${i.qty} <span style="font-size:11px;">${i.unit}</span></div><div style="font-size:11px;color:var(--color-text-secondary);">min ${i.min}</div></div>
+      <span class="badge badge-warn">Low</span>
+    </div>`).join('');
+    html+=`</div>`;
+  } else {
+    html+=`<div class="alert alert-ok"><i class="ti ti-circle-check" aria-hidden="true"></i> All items are above minimum stock.</div>`;
+  }
+  document.getElementById('page-dashboard').innerHTML=html;
+}
+
+function renderInventory(){
+  const u=currentUser;
+  if(u.role!=='Admin'&&!u.perms.view){document.getElementById('page-inventory').innerHTML=`<div class="locked-msg"><i class="ti ti-lock" aria-hidden="true"></i><div style="font-size:14px;color:var(--color-text-primary);">CAFE26 hasn't granted you view access yet.</div></div>`;return;}
+  
+  let html = renderCarousel('inventory');
+  
+  const cats=['Packaging','Food Prep','Breakfast','Maintenance'];
+  cats.forEach(cat=>{
+    const grp=items.filter(i=>i.category===cat);
+    if(!grp.length) return;
+    html+=`<div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><div class="cat-dot" style="background:${CAT_COLORS[cat]};width:11px;height:11px;"></div><span style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${cat}</span></div>`;
+    html+=grp.map(i=>`<div class="item-row">
+      <div class="item-main"><div class="item-name">${i.name}</div><div class="item-meta">${i.section} · min ${i.min} ${i.unit}</div></div>
+      <div style="text-align:right;margin-right:8px;"><div style="font-size:14px;font-weight:500;color:${isLow(i)?'var(--color-text-warning)':'var(--color-text-success)'};">${i.qty} <span style="font-size:11px;">${i.unit}</span></div></div>
+      <span class="badge ${isLow(i)?'badge-warn':'badge-ok'}">${isLow(i)?'Low':'OK'}</span>
+    </div>`).join('');
+    html+=`</div>`;
+  });
+  document.getElementById('page-inventory').innerHTML=html;
+}
+
+function renderRestock(){
+  const u=currentUser;
+  if(u.role!=='Admin'&&!u.perms.update){document.getElementById('page-restock').innerHTML=`<div class="locked-msg"><i class="ti ti-lock" aria-hidden="true"></i><div style="font-size:14px;color:var(--color-text-primary);">CAFE26 hasn't granted you update access yet.</div></div>`;return;}
+  
+  let html = renderFlipGallery();
+  
+  html+=`<div class="alert alert-info"><i class="ti ti-info-circle" aria-hidden="true"></i><span>Enter quantities added for each item. CAFE26 will review and confirm before stock is updated.</span></div>`;
+  html+=`<div class="card"><div style="font-size:15px;font-weight:500;margin-bottom:4px;color:var(--color-text-primary);">Saturday restock submission</div><div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:1rem;">${todayStr()}</div>`;
+  items.forEach(i=>{
+    html+=`<div class="item-row" style="gap:8px;">
+      <div class="cat-dot" style="background:${CAT_COLORS[i.category]}"></div>
+      <div class="item-main"><div class="item-name">${i.name}</div><div class="item-meta">Current: ${i.qty} ${i.unit}${isLow(i)?' · <span style="color:var(--color-text-warning);">Low</span>':''}</div></div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <span style="font-size:12px;color:var(--color-text-secondary);">Add</span>
+        <input type="number" id="rs-${i.id}" placeholder="0" min="0" style="width:60px;text-align:right;">
+        <span style="font-size:12px;color:var(--color-text-secondary);">${i.unit}</span>
+      </div>
+    </div>`;
+  });
+  html+=`<div style="margin-top:12px;"><label>Notes for CAFE26</label><textarea id="rs-notes" placeholder="e.g. Sugar was very low, added 10kg. Size 5 bags also restocked."></textarea></div>`;
+  html+=`<div class="btn-row"><button class="btn-primary" onclick="submitRestock()"><i class="ti ti-send" aria-hidden="true"></i> Submit to CAFE26</button></div></div>`;
+  const mine=pendingRestocks.filter(r=>r.submittedBy===u.name);
+  if(mine.length){
+    html+=`<div class="sec-title" style="margin-top:1.5rem;">My submissions</div>`;
+    html+=mine.map(r=>`<div class="card" style="padding:12px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${r.date}</div><div style="font-size:12px;color:var(--color-text-secondary);">Submitted ${r.time} · ${r.items.length} item(s)</div></div>
+        <span class="badge ${r.status==='confirmed'?'badge-ok':r.status==='rejected'?'badge-warn':'badge-muted'}">${r.status}</span>
+      </div>
+      ${r.status==='confirmed'?`<div style="font-size:12px;color:var(--color-text-success);margin-top:6px;"><i class="ti ti-check" aria-hidden="true"></i> Confirmed by CAFE26</div>`:''}
+      ${r.status==='rejected'?`<div style="font-size:12px;color:var(--color-text-danger);margin-top:6px;">Rejected: ${r.rejectReason}</div>`:''}
+    </div>`).join('');
+  }
+  document.getElementById('page-restock').innerHTML=html;
+}
+
+function submitRestock(){
+  const u=currentUser;
+  const restockItems=[];
+  items.forEach(i=>{const val=parseInt(document.getElementById('rs-'+i.id).value)||0;if(val>0) restockItems.push({id:i.id,name:i.name,unit:i.unit,qtyAdded:val,prevQty:i.qty});});
+  if(!restockItems.length){alert('Enter at least one quantity to restock.');return;}
+  const notes=document.getElementById('rs-notes').value.trim();
+  pendingRestocks.unshift({id:nextRid++,submittedBy:u.name,date:todayStr(),time:timeStr(),items:restockItems,notes,status:'pending',rejectReason:''});
+  addLog('restock',`${u.name} submitted Saturday restock`,`${restockItems.length} item(s)`,u.name);
+  alert('Submitted! CAFE26 will review and confirm.');
+  renderRestock();
+}
+
+function renderConfirm(){
+  if(currentUser.role!=='Admin'){document.getElementById('page-confirm').innerHTML='<div class="locked-msg"><i class="ti ti-lock" aria-hidden="true"></i>Admin only.</div>';return;}
+  const pending=pendingRestocks.filter(r=>r.status==='pending');
+  const done=pendingRestocks.filter(r=>r.status!=='pending');
+  let html='';
+  if(!pending.length&&!done.length){html='<div style="font-size:13px;color:var(--color-text-secondary);">No restock submissions yet.</div>';}
+  if(pending.length){
+    html+=`<div class="sec-title">Pending confirmation (${pending.length})</div>`;
+    html+=pending.map(r=>`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${r.submittedBy}'s restock</div><div style="font-size:12px;color:var(--color-text-secondary);">${r.date} · ${r.time}</div></div>
+        <span class="badge badge-muted">Pending</span>
+      </div>
+      <div style="font-size:13px;">
+        ${r.items.map(i=>`<div class="item-row" style="padding:6px 0;">
+          <div class="item-main"><div style="font-size:13px;color:var(--color-text-primary);">${i.name}</div><div style="font-size:11px;color:var(--color-text-secondary);">Was ${i.prevQty} ${i.unit}</div></div>
+          <span style="font-size:13px;color:var(--color-text-success);font-weight:500;">+${i.qtyAdded} ${i.unit}</span>
+          <span style="font-size:13px;color:var(--color-text-primary);margin-left:6px;">→ ${i.prevQty+i.qtyAdded}</span>
+        </div>`).join('')}
+      </div>
+      ${r.notes?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary);">Note: ${r.notes}</div>`:''}
+      <div class="btn-row">
+        <button class="btn-sm ok" onclick="confirmRestock(${r.id})"><i class="ti ti-check" aria-hidden="true"></i> Confirm & apply stock</button>
+        <button class="btn-sm danger" onclick="rejectRestock(${r.id})"><i class="ti ti-x" aria-hidden="true"></i> Reject</button>
+      </div>
+    </div>`).join('');
+  }
+  if(done.length){
+    html+=`<div class="sec-title" style="margin-top:1.5rem;">Past submissions</div>`;
+    html+=done.map(r=>`<div class="card" style="padding:12px 16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary);">${r.submittedBy} — ${r.date}</div><div style="font-size:12px;color:var(--color-text-secondary);">${r.items.length} item(s)</div></div>
+        <span class="badge ${r.status==='confirmed'?'badge-ok':'badge-warn'}">${r.status}</span>
+      </div>
+      ${r.status==='rejected'?`<div style="font-size:12px;color:var(--color-text-danger);margin-top:4px;">Reason: ${r.rejectReason}</div>`:''}
+    </div>`).join('');
+  }
+  document.getElementById('page-confirm').innerHTML=html;
+}
+
+function confirmRestock(id){
+  const r=pendingRestocks.find(x=>x.id===id);if(!r) return;
+  r.items.forEach(ri=>{const item=items.find(i=>i.id===ri.id);if(item)item.qty+=ri.qtyAdded;});
+  r.status='confirmed';
+  addLog('confirm',`CAFE26 confirmed restock by ${r.submittedBy}`,`${r.items.length} item(s) updated`,'CAFE26');
+  alert('Restock confirmed. Stock levels updated.');
+  renderConfirm();
+}
+
+function rejectRestock(id){
+  const reason=prompt('Reason for rejection (optional):');
+  const r=pendingRestocks.find(x=>x.id===id);if(!r) return;
+  r.status='rejected';r.rejectReason=reason||'No reason given';
+  addLog('confirm',`CAFE26 rejected restock by ${r.submittedBy}`,reason||'','CAFE26');
+  renderConfirm();
+}
+
+function renderMembers(){
+  if(currentUser.role!=='Admin'){document.getElementById('page-members').innerHTML='<div class="locked-msg"><i class="ti ti-lock" aria-hidden="true"></i>Admin only.</div>';return;}
+  
+  let html = renderParallaxGallery();
+  
+  const others=members.filter(m=>m.id!=='andy');
+  html+=`<div class="alert alert-info"><i class="ti ti-shield" aria-hidden="true"></i><span>Grant or revoke permissions for each member. Once granted access, they will appear on the login screen.</span></div>`;
+  html+=`<div class="sec-title">Members (${others.length})</div>`;
+  html+=others.map(m=>`<div class="member-card">
+    <div class="avatar" style="background:${m.bg};color:${m.fg};">${m.initials}</div>
+    <div class="member-info">
+      <div class="member-name">${m.name}</div>
+      <div class="member-sub">${m.active?`Active · granted by CAFE26`:'No access yet'}</div>
+      <div style="margin-top:5px;">
+        <span class="perm-chip ${m.perms.view?'on':''}"><i class="ti ti-eye" style="font-size:12px;" aria-hidden="true"></i> View</span>
+        <span class="perm-chip ${m.perms.update?'on':''}"><i class="ti ti-edit" style="font-size:12px;" aria-hidden="true"></i> Update</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;">
+      <button class="btn-sm ${m.perms.view?'danger':'ok'}" onclick="togglePerm('${m.id}','view')">${m.perms.view?'Revoke view':'Grant view'}</button>
+      <button class="btn-sm ${m.perms.update?'danger':'ok'}" onclick="togglePerm('${m.id}','update')">${m.perms.update?'Revoke update':'Grant update'}</button>
+    </div>
+  </div>`).join('');
+
+  html+=`<div class="sec-title" style="margin-top:1.5rem;">Add new member</div>`;
+  html+=`<div class="card"><div class="form-row"><div><label>Name</label><input type="text" id="new-mem-name" placeholder="Full name"></div><div><label>PIN (4 digits)</label><input type="password" id="new-mem-pin" placeholder="e.g. 2024" maxlength="4"></div></div>
+  <div class="btn-row"><button class="btn-primary" onclick="addMember()"><i class="ti ti-user-plus" aria-hidden="true"></i> Add member</button></div></div>`;
+  document.getElementById('page-members').innerHTML=html;
+}
+
+function togglePerm(id,perm){
+  const m=getMember(id);if(!m) return;
+  m.perms[perm]=!m.perms[perm];
+  m.active=m.perms.view||m.perms.update;
+  m.showOnLogin=m.active;
+  if(m.active) m.grantedBy='CAFE26';
+  addLog('access',`CAFE26 ${m.perms[perm]?'granted':'revoked'} ${perm} access for ${m.name}`,'','CAFE26');
+  renderMembers();
+}
+
+function addMember(){
+  const name=document.getElementById('new-mem-name').value.trim();
+  const pin=document.getElementById('new-mem-pin').value.trim();
+  if(!name){alert('Enter a name.');return;}
+  if(pin.length!==4||isNaN(pin)){alert('PIN must be exactly 4 digits.');return;}
+  const id='m_'+Date.now();
+  const initials=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  members.push({id,name,role:'Member',pin,initials,bg:'#E1F5EE',fg:'#085041',perms:{view:false,update:false},active:false,grantedBy:'',showOnLogin:false});
+  addLog('access',`CAFE26 added new member: ${name}`,'','CAFE26');
+  renderMembers();
+}
+
+function renderLog(){
+  if(currentUser.role!=='Admin'){document.getElementById('page-log').innerHTML='<div class="locked-msg"><i class="ti ti-lock" aria-hidden="true"></i>Admin only.</div>';return;}
+  
+  let html = renderLiquidGallery();
+  
+  if(!activityLog.length){html+='<div style="font-size:13px;color:var(--color-text-secondary);">No activity yet.</div>';document.getElementById('page-log').innerHTML=html;return;}
+  const iconMap={auth:'ti-login',restock:'ti-package',confirm:'ti-shield-check',access:'ti-user-check'};
+  const bgMap={auth:'var(--color-background-info)',restock:'var(--color-background-warning)',confirm:'var(--color-background-success)',access:'#EEEDFE'};
+  const fgMap={auth:'var(--color-text-info)',restock:'var(--color-text-warning)',confirm:'var(--color-text-success)',access:'#3C3489'};
+  html+=`<div class="sec-title">All activity</div><div class="card">`;
+  html+=activityLog.map(e=>`<div class="log-entry">
+    <div class="log-icon" style="background:${bgMap[e.type]||'var(--color-background-secondary)'};color:${fgMap[e.type]||'var(--color-text-secondary)'}"><i class="ti ${iconMap[e.type]||'ti-point'}" aria-hidden="true"></i></div>
+    <div><div style="font-size:13px;color:var(--color-text-primary);">${e.title}</div><div style="font-size:11px;color:var(--color-text-secondary);">${e.time}${e.detail?' · '+e.detail:''}</div></div>
+  </div>`).join('');
+  html+=`</div>`;
+  document.getElementById('page-log').innerHTML=html;
+}
+
+buildLoginList();
+</script>
+</body>
+</html>
