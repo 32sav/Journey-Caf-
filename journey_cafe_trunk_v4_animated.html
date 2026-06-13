@@ -447,12 +447,12 @@
 </div>
 
 <script>
-// Image URLs - Replace these with your actual GitHub image URLs
+// Image URLs - Using actual photos from repository
 const IMAGE_URLS = {
-  img1: 'https://via.placeholder.com/500x350?text=Journey+Cafe+Team+1',
-  img2: 'https://via.placeholder.com/500x350?text=Journey+Cafe+Team+2',
-  img3: 'https://via.placeholder.com/500x350?text=Journey+Cafe+Team+3',
-  img4: 'https://via.placeholder.com/500x350?text=Journey+Cafe+Team+4'
+  img1: 'https://raw.githubusercontent.com/32sav/Journey-Caf-/main/IMG-20260323-WA0100.jpg',
+  img2: 'https://raw.githubusercontent.com/32sav/Journey-Caf-/main/IMG-20260323-WA0109.jpg',
+  img3: 'https://raw.githubusercontent.com/32sav/Journey-Caf-/main/IMG-20260323-WA0112.jpg',
+  img4: 'https://raw.githubusercontent.com/32sav/Journey-Caf-/main/IMG-20260323-WA0115.jpg'
 };
 
 const CAT_COLORS={Packaging:'#178DDC','Food Prep':'#1D9E75',Breakfast:'#EF9F27',Maintenance:'#D85A30'};
@@ -596,7 +596,7 @@ function showPage(name,btn){
 function renderGallery3DCard(pageId) {
   return `
     <div class="gallery-container">
-      <div class="gallery-title">📸 Team Moments</div>
+      <div class="gallery-title">📸 Team Moments - 3D Rotation</div>
       <div class="card-3d-container">
         <div class="card-3d">
           <div class="card-3d-face">
@@ -612,7 +612,7 @@ function renderGallery3DCard(pageId) {
 function renderCarousel(pageId) {
   let html = `
     <div class="gallery-container">
-      <div class="gallery-title">🎬 Photo Carousel</div>
+      <div class="gallery-title">🎬 Photo Carousel - Smooth Transitions</div>
       <div class="carousel-container">
   `;
   
@@ -654,7 +654,7 @@ function renderFlipGallery() {
 function renderParallaxGallery() {
   let html = `
     <div class="gallery-container">
-      <div class="gallery-title">✨ Parallax Gallery</div>
+      <div class="gallery-title">✨ Parallax Gallery - Depth Effect</div>
       <div class="parallax-gallery">
   `;
   
@@ -669,7 +669,7 @@ function renderParallaxGallery() {
 function renderLiquidGallery() {
   let html = `
     <div class="gallery-container">
-      <div class="gallery-title">💧 Liquid Gallery</div>
+      <div class="gallery-title">💧 Liquid Gallery - Organic Morphing</div>
       <div class="liquid-gallery">
   `;
   
@@ -684,7 +684,7 @@ function renderLiquidGallery() {
 function renderStaggerGallery() {
   let html = `
     <div class="gallery-container">
-      <div class="gallery-title">🎪 Stagger Gallery</div>
+      <div class="gallery-title">🎪 Stagger Gallery - Sequential Animation</div>
       <div class="gallery-stagger">
   `;
   
